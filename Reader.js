@@ -163,7 +163,7 @@ function initReaderObject() {
     window.reader.loaded = 0
 }
 
-function gatherInfo() {
+function getConfig() {
     try {
         const title = document.getElementById('gn').innerText || ''
         const cover = document.getElementById('gd1').innerHTML.match(/url\((.*)\)/i)[1] || ''
@@ -172,8 +172,11 @@ function gatherInfo() {
     }catch (e) {
 
     }
+    const scriptUrl = window.reader.setting.src.match(/(http.*?\/)Reader.js/)[1]
+
     const isTranslate = window.reader.setting.getAttribute('translate') || "true"
     const isrebuild = window.reader.setting.getAttribute('rebuild') || "true"
+    const isOpenBlank = window.reader.setting.getAttribute('openBlank') || 'false'
 
     const fontSize = eval(window.reader.setting.getAttribute('fontsize')) || 9
     const tagFontSize =  eval(window.reader.setting.getAttribute('tag-fontsize')) || 9
@@ -182,6 +185,9 @@ function gatherInfo() {
     window.reader.info.tagFontSize = tagFontSize
     window.reader.info.isTranslate = eval(isTranslate)
     window.reader.info.isRebuild = eval(isrebuild)
+    window.reader.info.isOpenBlank = eval(isOpenBlank)
+    window.reader.info.scriptUrl = scriptUrl
+
 }
 
 function initImageStructure() {
@@ -272,7 +278,7 @@ function initStyleLink() {
     var readerStyle = document.createElement('link');
     readerStyle.rel = 'stylesheet';
     readerStyle.type = 'text/css';
-    readerStyle.href = 'https://visitor2006.github.io/reader.css?' + parseInt(Date.parse(new Date()) / 1000);
+    readerStyle.href = window.reader.info.scriptUrl+'reader.css?' + parseInt(Date.parse(new Date()) / 1000);
     document.body.appendChild(readerStyle);
     const iconStyle1 = document.createElement('link');
     iconStyle1.rel = 'stylesheet';
@@ -316,27 +322,27 @@ function reframeWebpage() {
 }
 
 function translateTag() {
-    var tagBox = document.getElementsByClassName('gtl')
+    let tagBox = document.getElementsByClassName('gtl')
     for (var i = 0; i < tagBox.length; i++) {
         tagBox[i].classList.add('tag')
     }
-    var tagBox = document.getElementsByClassName('gtw')
+    tagBox = document.getElementsByClassName('gtw')
     for (var i = 0; i < tagBox.length; i++) {
         tagBox[i].classList.add('tag')
     }
-    var tagBox = document.getElementsByClassName('gt')
+    tagBox = document.getElementsByClassName('gt')
     for (var i = 0; i < tagBox.length; i++) {
         tagBox[i].classList.add('tag')
     }
-    var tagBox = document.getElementsByClassName('tag')
-    for (var i = 0; i < tagBox.length; i++) {
-        var tag = tagBox[i].getElementsByTagName('a')[0]
-        tagBox[i].setAttribute('selected', false)
-        var tagName = tag.innerText
+    tagBox = document.getElementsByClassName('tag')
+    for (let tagc of tagBox) {
+        const tag = tagc.getElementsByTagName('a')[0] ||  tagc
+        tagc.setAttribute('selected', false)
+        const tagName = tag.innerText
         tag.innerText = window.reader.tag.dic[tagName] || tagName
         tag.setAttribute('tagName', tagName)
         tag.setAttribute('translateName', tag.innerText)
-        tagBox[i].onclick = function () {
+        tagc.onclick = function () {
             if (event && event.target != event.currentTarget) {
                 var tag = this.getElementsByTagName('a')[0]
                 if (window.reader.tag.selected == this) {
@@ -480,7 +486,7 @@ if(isOrigin > -1){
 }
 if(!isOrigin){
     initReaderObject()
-    gatherInfo()
+    getConfig()
     setStyle()
 
     if(window.reader.info.isRebuild){
@@ -501,6 +507,8 @@ if(!isOrigin){
 
     }
     if (document.location.href.indexOf('//e-hentai.org/g/') > -1) {
+                                         
+                             
         document.body.scrollTop = 0
         document.documentElement.scrollTop = 0
         initStyleLink()
@@ -541,6 +549,4 @@ if(!isOrigin){
     }
 
 }
-
-
 
